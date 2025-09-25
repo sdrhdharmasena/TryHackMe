@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - BrewMaster Coffee</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .btn-coffee {
+            background-color: #8B4513;
+            border-color: #8B4513;
+            color: white;
+        }
+
+        .btn-coffee:hover {
+            background-color: #A0522D;
+            border-color: #A0522D;
+            color: white;
+        }
+
+        .text-coffee {
+            color: #8B4513 !important;
+        }
+
+        .error-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+
+        <div class="container">
+            <div class="error-container">
+                <div class="text-center">
+                    <i class="fas fa-coffee fa-5x text-coffee mb-4"></i>
+                    <h1 class="display-1 text-coffee">404</h1>
+                    <h2 class="mb-4">Oops! Page Not Found</h2>
+                    <p class="lead mb-4">
+                        Looks like this page got lost in the coffee grounds.
+                        Let's get you back to something brewing!
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="/" class="btn btn-coffee">
+                            <i class="fas fa-home"></i> Go Home
+                        </a>
+                        <a href="/coffee" class="btn btn-outline-coffee">
+                            <i class="fas fa-coffee"></i> Browse Menu
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

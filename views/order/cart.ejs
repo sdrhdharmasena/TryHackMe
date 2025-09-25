@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - BrewMaster Coffee</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .btn-coffee {
+            background-color: #8B4513;
+            border-color: #8B4513;
+            color: white;
+        }
+
+        .btn-coffee:hover {
+            background-color: #A0522D;
+            border-color: #A0522D;
+            color: white;
+        }
+
+        .text-coffee {
+            color: #8B4513 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container mt-4">
+            <h2 class="text-coffee mb-4">
+                <i class="fas fa-shopping-cart"></i> Your Shopping Cart
+            </h2>
+
+            <% if (cart && cart.length> 0) { %>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Cart Items</h5>
+                                <% cart.forEach((item, index)=> { %>
+                                    <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                        <div>
+                                            <h6>Coffee Item #<%= item.coffeeId %>
+                                            </h6>
+                                            <p class="text-muted mb-0">Quantity: <%= item.quantity %>
+                                            </p>
+                                        </div>
+                                        <button class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                    </div>
+                                    <% }); %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Order Summary</h5>
+                                <p>Items: <%= cart.length %>
+                                </p>
+                                <hr>
+                                <div class="d-grid">
+                                    <a href="/order/checkout" class="btn btn-coffee">
+                                        <i class="fas fa-credit-card"></i> Proceed to Checkout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                        <h3 class="text-muted">Your cart is empty</h3>
+                        <p class="text-muted">Start shopping to add items to your cart.</p>
+                        <a href="/coffee" class="btn btn-coffee">
+                            <i class="fas fa-coffee"></i> Browse Coffee
+                        </a>
+                    </div>
+                    <% } %>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
