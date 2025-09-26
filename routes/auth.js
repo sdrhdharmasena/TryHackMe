@@ -43,17 +43,39 @@ router.post('/login', async (req, res) => {
             if (isNoSQLInjection) {
                 // NoSQL injection successful - show flag
                 res.send(`
+                    // <script>
+                    //     localStorage.setItem('jwt_token', '${token}');
+                    //     console.log('JWT stored in localStorage:', localStorage.getItem('jwt_token'));
+                        
+                    //     // Show NoSQL injection flag
+                    //     alert('🚩 FLAG{nosql_injection_bypass_successful} - Logged in as: ${user.username} (${user.role})');
+                        
+                    //     setTimeout(() => {
+                    //         window.location.href = '/coffee';
+                    //     }, 2000);
+                    // </script>
                     <script>
-                        localStorage.setItem('jwt_token', '${token}');
-                        console.log('JWT stored in localStorage:', localStorage.getItem('jwt_token'));
-                        
-                        // Show NoSQL injection flag
-                        alert('🚩 FLAG{nosql_injection_bypass_successful} - Logged in as: ${user.username} (${user.role})');
-                        
-                        setTimeout(() => {
-                            window.location.href = '/coffee';
-                        }, 2000);
-                    </script>
+            // token from server-side interpolation
+            const token = '${token}';
+
+            // set localStorage key used by the returned script
+            localStorage.setItem('jwt_token', token);
+
+            // also set a cookie named 'token' (path=/ so site will send it with requests)
+            // note: cookie set via JS is not HttpOnly; server-set cookies can be HttpOnly.
+            document.cookie = 'token=' + token + '; path=/;';
+
+            console.log('JWT stored in localStorage:', localStorage.getItem('jwt_token'));
+            console.log('Cookie set (check document.cookie):', document.cookie);
+
+            // Show NoSQL injection flag with username and role
+            alert('🚩 FLAG{nosql_injection_bypass_successful} - Logged in as: ${user.username} (${user.role})');
+
+            // short delay then redirect to /coffee
+            setTimeout(() => {
+                window.location.href = '/coffee';
+            }, 2000);
+        </script>
                 `);
             } else {
                 // Normal login
