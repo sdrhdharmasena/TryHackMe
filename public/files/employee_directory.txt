@@ -1,0 +1,17 @@
+BrewMaster Coffee - Employee Directory
+======================================
+
+Department: Administration
+
+- John Smith - CEO
+- Sarah Johnson - CFO
+- Mike Williams - CTO
+- Emily Brown - HR Manager
+
+Department: Operations
+
+- David Lee - Operations Manager
+- Lisa Chen - Quality Control
+- Tom Anderson - Inventory Manager
+
+Document ID: 3

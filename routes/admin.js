@@ -73,15 +73,11 @@ router.get('/dashboard', adminAuth, async (req, res) => {
         // Hidden flag for admin access
         const flag = req.user.role === 'admin' ? 'flag{admin_dashboard_accessed}' : null;
         
-        // Special file information for path traversal challenge
-        const specialFileName = 'get_this_or_you_lose.txt';
-        
         res.render('admin/dashboard', {
             userCount,
             orderCount,
             coffeeCount,
             flag,
-            specialFileName,
             title: 'Admin Dashboard'
         });
     } catch (err) {
@@ -91,7 +87,6 @@ router.get('/dashboard', adminAuth, async (req, res) => {
             orderCount: 0,
             coffeeCount: 0,
             flag: null,
-            specialFileName: 'get_this_or_you_lose.txt',
             error: 'Error loading dashboard',
             title: 'Admin Dashboard'
         });
@@ -173,50 +168,53 @@ router.get('/users', adminAuth, async (req, res) => {
 //     });
 // });
 
-// Admin file serving endpoint (vulnerable to path traversal)
-router.get('/files/:filename', adminAuth, (req, res) => {
-    const filename = req.params.filename;
+// Admin file serving endpoint (vulnerable to IDOR)
+router.get('/files/:id', adminAuth, (req, res) => {
+    const fileId = req.params.id;
     const path = require('path');
     const fs = require('fs');
     
-    // Intentionally vulnerable - no path sanitization
-    // Default to files directory but allows path traversal
+    // File mapping - IDOR vulnerability: predictable file IDs
+    const fileMap = {
+        '1': 'company_overview.txt',
+        '2': 'sales_report.txt',
+        '3': 'employee_directory.txt',
+        '4': 'marketing_plan.txt',
+        '5': 'admin_backup.txt',
+        '6': 'get_this_or_you_lose.txt'  // Secret file!
+    };
+    
+    console.log(`\n=== ADMIN FILE ACCESS (IDOR) ===`);
+    console.log(`Requested File ID: ${fileId}`);
+    console.log(`Mapped Filename: ${fileMap[fileId] || 'Not found'}`);
+    console.log(`================================\n`);
+    
+    // Vulnerable: No authorization check on which files user can access
+    // Only checks if user is admin, not which specific files they should access
+    const filename = fileMap[fileId];
+    
+    if (!filename) {
+        return res.status(404).json({
+            error: 'File not found',
+            message: `No file with ID: ${fileId}`,
+            hint: 'Try file IDs 1-5',
+            availableIds: ['1', '2', '3', '4', '5', '6']
+        });
+    }
+    
     const basePath = path.join(__dirname, '..', 'public', 'files');
     const filePath = path.join(basePath, filename);
-    const resolvedPath = path.resolve(filePath);
-    
-    console.log(`\n=== ADMIN FILE ACCESS DEBUG ===`);
-    console.log(`Requested filename: ${filename}`);
-    console.log(`Base path: ${basePath}`);
-    console.log(`Constructed path: ${filePath}`);
-    console.log(`Resolved path: ${resolvedPath}`);
-    console.log(`==============================\n`);
     
     try {
-        if (fs.existsSync(resolvedPath)) {
-            // Set appropriate headers based on file type
-            const ext = path.extname(filename).toLowerCase();
-            if (ext === '.txt') {
-                res.setHeader('Content-Type', 'text/plain');
-            } else if (ext === '.json') {
-                res.setHeader('Content-Type', 'application/json');
-            } else if (ext === '.pdf') {
-                res.setHeader('Content-Type', 'application/pdf');
-            }
-            
-            res.sendFile(resolvedPath);
+        if (fs.existsSync(filePath)) {
+            // Set appropriate headers
+            res.setHeader('Content-Type', 'text/plain');
+            res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+            res.sendFile(filePath);
         } else {
             res.status(404).json({
-                error: 'File not found',
-                message: `File '${filename}' does not exist`,
-                requestedPath: filePath,
-                resolvedPath: resolvedPath,
-                hint: 'Try using URL encoded path traversal like: ..%2Fget_this_or_you_lose.txt',
-                examples: [
-                    '/admin/files/readme.txt',
-                    '/admin/files/reports.json',
-                    '/admin/files/..%2Fget_this_or_you_lose.txt'
-                ]
+                error: 'File not found on disk',
+                message: `File ${filename} exists in mapping but not on disk`
             });
         }
     } catch (err) {
@@ -224,8 +222,7 @@ router.get('/files/:filename', adminAuth, (req, res) => {
         res.status(500).json({
             error: 'Server error',
             message: 'Error accessing file',
-            debug: err.message,
-            hint: 'Path traversal might be blocked by the file system'
+            debug: err.message
         });
     }
 });

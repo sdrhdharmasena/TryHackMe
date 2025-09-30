@@ -1,0 +1,13 @@
+BrewMaster Coffee Company - Internal Document
+==============================================
+
+Company Overview:
+- Founded: 2020
+- Location: Downtown Coffee District
+- Employees: 45
+- Annual Revenue: $2.5M
+
+This is a public company overview document.
+Nothing sensitive here.
+
+Document ID: 1
