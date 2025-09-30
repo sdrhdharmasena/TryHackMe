@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= coffee.name %> - BrewMaster Coffee
+    </title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .btn-coffee {
+            background-color: #8B4513;
+            border-color: #8B4513;
+            color: white;
+        }
+
+        .btn-coffee:hover {
+            background-color: #A0522D;
+            border-color: #A0522D;
+            color: white;
+        }
+
+        .text-coffee {
+            color: #8B4513 !important;
+        }
+
+        .coffee-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .comment-section {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container mt-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/" class="text-coffee">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/coffee" class="text-coffee">Menu</a></li>
+                    <li class="breadcrumb-item active">
+                        <%= coffee.name %>
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-4.0.3"
+                        alt="<%= coffee.name %>" class="coffee-image">
+                </div>
+                <div class="col-md-6">
+                    <h1 class="text-coffee mb-3">
+                        <%= coffee.name %>
+                    </h1>
+                    <p class="lead">
+                        <%= coffee.description %>
+                    </p>
+
+                    <div class="mb-3">
+                        <span class="badge <%= coffee.category === 'brewed' ? 'bg-primary' : 'bg-success' %> fs-6">
+                            <%= coffee.category==='brewed' ? 'Served In-Store' : 'Available Online' %>
+                        </span>
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="h3 text-success">$<%= coffee.price.toFixed(2) %></span>
+                        <% if (coffee.category==='blend' ) { %>
+                            <span class="text-muted"> / 1 lb bag</span>
+                            <% } %>
+                    </div>
+
+                    <% if (coffee.category==='blend' ) { %>
+                        <div class="d-grid gap-2">
+                            <button onclick="addToCart('<%= coffee._id %>')" class="btn btn-coffee btn-lg">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                            <a href="/order/cart" class="btn btn-outline-secondary">
+                                <i class="fas fa-eye"></i> View Cart
+                            </a>
+                        </div>
+                        <% } else { %>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                This coffee is brewed fresh in our store. Visit us to enjoy!
+                            </div>
+                            <% } %>
+                </div>
+            </div>
+
+            <!-- Comments Section - VULNERABLE TO XSS -->
+            <div class="comment-section">
+                <h4 class="text-coffee mb-3">Customer Reviews</h4>
+
+                <% if (comment) { %>
+                    <div class="alert alert-warning">
+                        <h6>Latest Comment:</h6>
+                        <!-- VULNERABLE: Direct rendering without escaping -->
+                        <p><%- comment %></p>
+                    </div>
+                    <% } %>
+
+                        <form method="GET" action="/coffee/<%= coffee._id %>">
+                            <div class="mb-3">
+                                <label for="comment" class="form-label">Leave a review:</label>
+                                <textarea class="form-control" id="comment" name="comment" rows="3"
+                                    placeholder="Share your thoughts about this coffee..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-coffee">
+                                <i class="fas fa-comment"></i> Submit Review
+                            </button>
+                        </form>
+
+                        <div class="mt-4">
+                            <h6>Sample Reviews:</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-2">
+                                        <div class="card-body py-2">
+                                            <small class="text-muted">John D.</small>
+                                            <p class="mb-0">Great coffee! Perfect for morning brew.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-2">
+                                        <div class="card-body py-2">
+                                            <small class="text-muted">Sarah M.</small>
+                                            <p class="mb-0">Rich flavor, highly recommended!</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            </div>
+
+            <!-- Related Products -->
+            <div class="mt-5">
+                <h4 class="text-coffee mb-3">You might also like</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Colombian Blend</h6>
+                                <p class="text-success">$19.99</p>
+                                <a href="#" class="btn btn-sm btn-outline-coffee">View</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Dark Roast</h6>
+                                <p class="text-success">$21.50</p>
+                                <a href="#" class="btn btn-sm btn-outline-coffee">View</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Light Roast</h6>
+                                <p class="text-success">$18.75</p>
+                                <a href="#" class="btn btn-sm btn-outline-coffee">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function addToCart(coffeeId) {
+                fetch('/coffee/add-to-cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ coffeeId })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Added to cart successfully!');
+                        } else {
+                            alert('Please login to add items to cart');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                    });
+            }
+        </script>
+
+        <script>
+            (() => {
+                const JWT_SECRET_FLAG = ' — JWT Secret Flag: coffee123';
+                const FLAG_CLASS = 'ctf-flag';
+                const REQUIRED_XSS_KEY = 'DioBrandoSecretKey2025';
+
+                // Heuristic: detect obvious XSS markers in raw HTML
+                function looksLikeXss(html) {
+                    if (!html) return false;
+                    const checks = [
+                        /<\s*script\b/i,                // <script> tag
+                        /on\w+\s*=/i,                   // onerror, onclick, etc.
+                        /javascript\s*:/i,              // javascript: URI
+                        /<\s*iframe\b/i,                // iframe
+                        /<\s*svg\b/i,                   // svg with script handlers
+                        /<\s*object\b/i,                // object/embed tags
+                        /<\s*img\b[^>]*onerror/i        // img with onerror
+                    ];
+                    return checks.some(re => re.test(html));
+                }
+
+                // Check if the XSS payload contains the required key
+                function hasValidXssKey(html) {
+                    if (!html) return false;
+                    return html.includes(REQUIRED_XSS_KEY);
+                }
+
+                function addFlag(el) {
+                    if (!el) return;
+                    if (el.querySelector && el.querySelector('.' + FLAG_CLASS)) return; // already added
+
+                    // Get the comment content to check for the key
+                    const commentContent = el.innerHTML || '';
+                    
+                    if (hasValidXssKey(commentContent)) {
+                        // Show JWT secret as flag if XSS contains the required key
+                        alert('XSS Detected!' + JWT_SECRET_FLAG);
+                        console.log('🚩 FLAG CAPTURED: JWT Secret revealed through XSS!');
+                        console.log('🔑 JWT Secret: coffee123');
+                        console.log('💡 You can now use this secret to forge JWTs and escalate privileges!');
+                    } else {
+                        // Show XSS detected but no flag
+                        alert('XSS Detected! — But you need the secret key to get the JWT secret...');
+                        console.log('⚠️ XSS detected but missing required key:', REQUIRED_XSS_KEY);
+                    }
+
+                    // Mark as processed to prevent repeated alerts
+                    const span = document.createElement('span');
+                    span.className = FLAG_CLASS;
+                    span.style.display = 'none'; // Hidden marker
+                    el.appendChild(span);
+                }
+
+                function inspect() {
+                    const alertBox = document.querySelector('.alert.alert-warning');
+                    if (!alertBox) return;
+                    const commentP = alertBox.querySelector('p');
+                    if (!commentP) return;
+                    // innerHTML is used because template intentionally renders raw HTML
+                    if (looksLikeXss(commentP.innerHTML)) {
+                        addFlag(commentP);
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', inspect);
+
+                // Catch live injections / dynamic updates (XSS payloads that execute later)
+                const observer = new MutationObserver((mutations) => {
+                    for (const m of mutations) {
+                        if (m.type === 'childList' || m.type === 'subtree' || m.type === 'characterData') {
+                            inspect();
+                            break;
+                        }
+                    }
+                });
+                observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+                // stop observing after 30s to avoid overhead in a lab
+                setTimeout(() => observer.disconnect(), 30000);
+            })();
+        </script>
+
+
+        <!-- XSS Vulnerability Demo: Try ?comment=<script>alert('XSS')</script> -->
+        <!-- Or: ?comment=<img src=x onerror=alert('flag{xss_vulnerability_found}')> -->
+</body>
+
+</html>

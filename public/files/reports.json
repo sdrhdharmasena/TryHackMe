@@ -1,0 +1,16 @@
+{
+  "coffee_shop_sales_report": {
+    "period": "September 2024",
+    "total_revenue": 12450.75,
+    "orders_count": 234,
+    "top_selling_items": [
+      {"name": "Cappuccino", "sold": 89, "revenue": 400.50},
+      {"name": "Latte", "sold": 76, "revenue": 399.00},
+      {"name": "Americano", "sold": 65, "revenue": 243.75}
+    ],
+    "daily_averages": {
+      "revenue": 415.02,
+      "orders": 7.8
+    }
+  }
+}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - BrewMaster Coffee</title>
+    <!-- Intentionally NO X-Frame-Options header for clickjacking vulnerability -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .btn-coffee { background-color: #8B4513; border-color: #8B4513; color: white; }
+        .btn-coffee:hover { background-color: #A0522D; border-color: #A0522D; color: white; }
+        .text-coffee { color: #8B4513 !important; }
+        .stat-card { border-left: 4px solid #8B4513; }
+        .flag-section { background: linear-gradient(45deg, #ffd700, #ffed4e); padding: 1rem; border-radius: 10px; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #8B4513;">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-coffee"></i> BrewMaster Admin
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/coffee">View Site</a>
+                <a class="nav-link" href="/auth/logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header text-coffee">
+                        <h5><i class="fas fa-tachometer-alt"></i> Admin Panel</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="/admin/dashboard" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-chart-bar"></i> Dashboard
+                        </a>
+                        <a href="/admin/coffees" class="list-group-item list-group-item-action">
+                            <i class="fas fa-coffee"></i> Manage Coffees
+                        </a>
+                        <a href="/admin/users" class="list-group-item list-group-item-action">
+                            <i class="fas fa-users"></i> Manage Users
+                        </a>
+                        <a href="/admin/secret" class="list-group-item list-group-item-action text-warning">
+                            <i class="fas fa-lock"></i> Secret Panel
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <h2 class="text-coffee mb-4">
+                    <i class="fas fa-chart-line"></i> Dashboard Overview
+                </h2>
+
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h5 class="card-title text-muted">Total Users</h5>
+                                        <h3 class="text-coffee"><%= userCount %></h3>
+                                    </div>
+                                    <i class="fas fa-users fa-2x text-coffee"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h5 class="card-title text-muted">Total Orders</h5>
+                                        <h3 class="text-coffee"><%= orderCount %></h3>
+                                    </div>
+                                    <i class="fas fa-shopping-cart fa-2x text-coffee"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h5 class="card-title text-muted">Coffee Products</h5>
+                                        <h3 class="text-coffee"><%= coffeeCount %></h3>
+                                    </div>
+                                    <i class="fas fa-coffee fa-2x text-coffee"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flag Display for CTF -->
+                <% if (flag) { %>
+                    <div class="flag-section">
+                        <h4><i class="fas fa-flag"></i> Admin Access Granted!</h4>
+                        <div class="alert alert-success">
+                            <strong>Flag:</strong> <code>You_Are_The_Admin_Now</code>
+                        </div>
+                        <p class="mb-0">Congratulations! You successfully accessed the admin dashboard.</p>
+                    </div>
+                <% } %>
+
+                <!-- Quick Actions -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header text-coffee">
+                                <h5><i class="fas fa-plus"></i> Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <!-- <a href="/admin/add-coffee" class="btn btn-coffee">
+                                        <i class="fas fa-coffee"></i> Add New Coffee
+                                    </a>
+                                    <a href="/admin/users" class="btn btn-outline-coffee">
+                                        <i class="fas fa-users"></i> View All Users
+                                    </a>
+                                    <a href="/admin/secret" class="btn btn-warning">
+                                        <i class="fas fa-secret"></i> Secret Panel
+                                    </a> -->
+                                    <a href="/admin/files/readme.txt" class="btn btn-info" target="_blank">
+                                        <i class="fas fa-file-alt"></i> File Server
+                                    </a>
+                                    <p><strong>Secret File Name:</strong> <code>get_this_or_you_lose.txt</code></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header text-coffee">
+                                <h5><i class="fas fa-info-circle"></i> System Info</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="fas fa-server text-coffee"></i> Server Status: <span class="text-success">Online</span></li>
+                                    <li><i class="fas fa-database text-coffee"></i> Database: <span class="text-success">Connected</span></li>
+                                    <li><i class="fas fa-shield-alt text-coffee"></i> Security: <span class="text-danger">Vulnerable (Testing Mode)</span></li>
+                                    <li><i class="fas fa-clock text-coffee"></i> Uptime: 24h 15m</li>
+                                    <li><i class="fas fa-file-alt text-coffee"></i> File Server: <span class="text-success">Active</span></li>
+                                </ul>
+                                <!-- <hr> -->
+                                    <!-- <div class="mt-3">
+                                        <h6><i class="fas fa-folder text-coffee"></i> Admin File Access</h6>
+                                        <p class="small text-muted mb-2">Access files via: <code>/admin/files/filename</code></p>
+                                        <div class="alert alert-warning alert-sm p-2">
+                                            <strong>⚠️ Important File:</strong><br>
+                                            <code><%= specialFileName || 'get_this_or_you_lose.txt' %></code><br>
+                                            <small class="text-muted">This file exists outside the standard files directory.</small><br>
+                                            <strong>Access URL:</strong> <br>
+                                            <code class="text-danger">/admin/files/..%2F<%= specialFileName || 'get_this_or_you_lose.txt' %></code>
+                                        </div>
+                                        <div class="mt-2">
+                                            <a href="/admin/files/..%2F<%= specialFileName || 'get_this_or_you_lose.txt' %>" 
+                                            class="btn btn-sm btn-outline-danger" target="_blank">
+                                                <i class="fas fa-exclamation-triangle"></i> Access Secret File
+                                            </a>
+                                        </div>
+                                    </div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity (Mock Data) -->
+                <div class="card mt-4">
+                    <div class="card-header text-coffee">
+                        <h5><i class="fas fa-activity"></i> Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="fas fa-user text-primary"></i> New user registered: john@example.com</span>
+                                <small class="text-muted">2 hours ago</small>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="fas fa-shopping-cart text-success"></i> Order #12345 completed</span>
+                                <small class="text-muted">4 hours ago</small>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span><i class="fas fa-coffee text-warning"></i> New coffee added: Colombian Blend</span>
+                                <small class="text-muted">1 day ago</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- This page is vulnerable to clickjacking due to missing X-Frame-Options header -->
+    <!-- Attackers can embed this page in an iframe and trick users into clicking hidden elements -->
+</body>
+</html>

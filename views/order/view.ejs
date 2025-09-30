@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History - BrewMaster Coffee</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .btn-coffee {
+            background-color: #8B4513;
+            border-color: #8B4513;
+            color: white;
+        }
+
+        .btn-coffee:hover {
+            background-color: #A0522D;
+            border-color: #A0522D;
+            color: white;
+        }
+
+        .text-coffee {
+            color: #8B4513 !important;
+        }
+
+        .idor-flag {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-coffee">
+                    <i class="fas fa-history"></i> Order History
+                </h2>
+                <% if (user) { %>
+                    <span class="badge bg-info">Viewing orders for: <%= user.username %></span>
+                    <% } %>
+            </div>
+
+            <!-- IDOR Vulnerability Demo - Show flag if accessing other user's data -->
+            <% if (user && user.username !=='testuser' ) { %>
+                <div class="idor-flag">
+                    <h4><i class="fas fa-flag"></i> IDOR Vulnerability Exploited!</h4>
+                    <div class="alert alert-warning">
+                        <strong>CTF Flag:</strong> <code>flag{idor_vulnerability_found}</code>
+                    </div>
+                    <p class="mb-0">You successfully accessed another user's private order data!</p>
+                </div>
+                <% } %>
+
+                    <% if (orders && orders.length> 0) { %>
+                        <div class="row">
+                            <% orders.forEach(order=> { %>
+                                <div class="col-md-6 mb-4">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between">
+                                            <span>Order #<%= order._id.toString().slice(-6) %></span>
+                                            <span
+                                                class="badge <%= order.status === 'completed' ? 'bg-success' : order.status === 'pending' ? 'bg-warning' : 'bg-primary' %>">
+                                                <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                                            </span>
+                                        </div>
+                                        <div class="card-body">
+                                            <h6 class="card-title">Customer Info:</h6>
+                                            <p class="mb-1"><strong>Name:</strong>
+                                                <%= order.customerInfo.name %>
+                                            </p>
+                                            <p class="mb-1"><strong>Email:</strong>
+                                                <%= order.customerInfo.email %>
+                                            </p>
+                                            <% if (order.customerInfo.phone) { %>
+                                                <p class="mb-1"><strong>Phone:</strong>
+                                                    <%= order.customerInfo.phone %>
+                                                </p>
+                                                <% } %>
+                                                    <% if (order.customerInfo.address) { %>
+                                                        <p class="mb-1"><strong>Address:</strong>
+                                                            <%= order.customerInfo.address %>
+                                                        </p>
+                                                        <% } %>
+
+                                                            <hr>
+                                                            <h6>Order Items:</h6>
+                                                            <ul class="list-unstyled">
+                                                                <% order.items.forEach(item=> { %>
+                                                                    <li class="d-flex justify-content-between">
+                                                                        <span>
+                                                                            <%= item.name %> x<%= item.quantity %>
+                                                                        </span>
+                                                                        <span class="text-success">$<%= (item.price *
+                                                                                item.quantity).toFixed(2) %></span>
+                                                                    </li>
+                                                                    <% }); %>
+                                                            </ul>
+
+                                                            <% if (order.notes) { %>
+                                                                <hr>
+                                                                <p class="mb-1"><strong>Notes:</strong>
+                                                                    <%= order.notes %>
+                                                                </p>
+                                                                <% } %>
+
+                                                                    <hr>
+                                                                    <div
+                                                                        class="d-flex justify-content-between align-items-center">
+                                                                        <small class="text-muted">
+                                                                            Ordered: <%= new
+                                                                                Date(order.createdAt).toLocaleDateString()
+                                                                                %>
+                                                                        </small>
+                                                                        <h5 class="text-success mb-0">
+                                                                            Total: $<%= order.totalAmount.toFixed(2) %>
+                                                                        </h5>
+                                                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                        </div>
+                        <% } else { %>
+                            <div class="text-center py-5">
+                                <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+                                <h3 class="text-muted">No orders found</h3>
+                                <p class="text-muted">This user hasn't placed any orders yet.</p>
+                                <a href="/coffee" class="btn btn-coffee">
+                                    <i class="fas fa-coffee"></i> Start Shopping
+                                </a>
+                            </div>
+                            <% } %>
+
+                                <!-- IDOR Vulnerability Hint for CTF players -->
+                                <div class="mt-5">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="text-coffee">💡 CTF Hint:</h6>
+                                            <p class="mb-0">Try changing the user ID in the URL to access other users'
+                                                orders!</p>
+                                            <small class="text-muted">Example:
+                                                /order/view/507f1f77bcf86cd799439011</small>
+                                        </div>
+                                    </div>
+                                </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+        <!-- IDOR Vulnerability: This page shows orders for ANY user ID without proper authorization checks -->
+</body>
+
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Menu - BrewMaster Coffee</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .btn-coffee {
+            background-color: #8B4513;
+            border-color: #8B4513;
+            color: white;
+        }
+
+        .btn-coffee:hover {
+            background-color: #A0522D;
+            border-color: #A0522D;
+            color: white;
+        }
+
+        .text-coffee {
+            color: #8B4513 !important;
+        }
+
+        .coffee-card {
+            transition: transform 0.3s;
+        }
+
+        .coffee-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .search-section {
+            background-color: #f8f9fa;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container mt-4">
+            <h1 class="text-center text-coffee mb-4">Our Coffee Menu</h1>
+
+            <!-- Search and Filter Section -->
+            <div class="search-section rounded">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <form method="GET" action="/coffee" class="d-flex">
+                                <input type="text" name="search" class="form-control me-2"
+                                    placeholder="Search coffees..." value="<%= search %>">
+                                <button class="btn btn-coffee" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+                            
+                            <!-- XSS Vulnerability: Display search results unsafely -->
+                            <% if (unsafeSearch && unsafeSearch.length > 0) { %>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        Search results for: <span class="fw-bold"><%- unsafeSearch %></span>
+                                    </small>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="btn-group w-100" role="group">
+                                <a href="/coffee"
+                                    class="btn <%= category === 'all' ? 'btn-coffee' : 'btn-outline-secondary' %>">All</a>
+                                <a href="/coffee?category=brewed"
+                                    class="btn <%= category === 'brewed' ? 'btn-coffee' : 'btn-outline-secondary' %>">Brewed</a>
+                                <a href="/coffee?category=blend"
+                                    class="btn <%= category === 'blend' ? 'btn-coffee' : 'btn-outline-secondary' %>">Blends</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coffee Grid -->
+            <div class="row">
+                <% if (coffees && coffees.length> 0) { %>
+                    <% coffees.forEach(coffee=> { %>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card coffee-card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-coffee">
+                                        <i class="fas fa-coffee"></i>
+                                        <%= coffee.name %>
+                                    </h5>
+                                    <p class="card-text">
+                                        <%= coffee.description %>
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="h5 text-success mb-0">$<%= coffee.price.toFixed(2) %></span>
+                                        <span
+                                            class="badge <%= coffee.category === 'brewed' ? 'bg-primary' : 'bg-success' %>">
+                                            <%= coffee.category==='brewed' ? 'In-Store' : 'Online' %>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-grid gap-2">
+                                        <a href="/coffee/<%= coffee._id %>" class="btn btn-outline-coffee">View
+                                            Details</a>
+                                        <% if (coffee.category==='blend' ) { %>
+                                            <button onclick="addToCart('<%= coffee._id %>')" class="btn btn-coffee">
+                                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                                            </button>
+                                            <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% }); %>
+                            <% } else { %>
+                                <div class="col-12">
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-coffee fa-4x text-muted mb-3"></i>
+                                        <h3 class="text-muted">No coffees found</h3>
+                                        <p class="text-muted">Try adjusting your search or filter criteria.</p>
+                                        <a href="/coffee" class="btn btn-coffee">View All Coffees</a>
+                                    </div>
+                                </div>
+                                <% } %>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+        <script>
+            // XSS Detection Script - only triggers when actual XSS payloads are executed
+            (function() {
+                // Check if there's an actual XSS payload in the search parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const searchParam = urlParams.get('search');
+                
+                // Only trigger if search contains actual XSS patterns AND they're rendered unsafely
+                if (searchParam && (
+                    searchParam.includes('<script>') ||
+                    searchParam.includes('<img') ||
+                    searchParam.includes('<svg') ||
+                    searchParam.includes('javascript:') ||
+                    searchParam.includes('onerror=') ||
+                    searchParam.includes('onload=') ||
+                    searchParam.includes('onclick=')
+                )) {
+                    // Check if the XSS was actually rendered (look for script tags or event handlers in the page)
+                    const pageContent = document.body.innerHTML;
+                    if (pageContent.includes(searchParam) && (
+                        pageContent.includes('<script>') ||
+                        pageContent.includes('onerror=') ||
+                        pageContent.includes('onload=') ||
+                        pageContent.includes('javascript:')
+                    )) {
+                        // Only show alert if XSS was actually executed
+                        setTimeout(function() {
+                            if (!window.xssAlertShown) {
+                                window.xssAlertShown = true;
+                                alert('NoSQL Vulnerability: Dio holds all the secrets');
+                            }
+                        }, 100);
+                    }
+                }
+                
+                // Also detect if someone manually injects scripts
+                const originalCreateElement = document.createElement;
+                document.createElement = function(tagName) {
+                    const element = originalCreateElement.call(this, tagName);
+                    if (tagName.toLowerCase() === 'script' && !window.xssAlertShown) {
+                        window.xssAlertShown = true;
+                        alert('NoSQL Vulnerability: Dio holds all the secrets');
+                    }
+                    return element;
+                };
+            })();
+            
+            function addToCart(coffeeId) {
+                fetch('/coffee/add-to-cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ coffeeId })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Added to cart!');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Please login to add items to cart');
+                    });
+            }
+        </script>
+
+        <!-- Hidden comment for CTF: NoSQL injection possible in search parameter -->
+        <!-- Try: /coffee?search[$ne]=null or /coffee?category[$ne]=null -->
+</body>
+
+</html>

