@@ -1,8 +1,11 @@
-************************************************************************************
+********************************************************************************************
 
+CONFIDENTIAL - ADMIN ACCESS ONLY
+
+BrewMaster Coffee - Secret Administrative File
 
 Get the flag by decoding this:
-aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1kUXc0dzlXZ1hjUSZsaXN0PVJEZFF3NHc5V2dYY1E=
+ZmxhZ3todHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PWRRdzR3OVdnWGNRJmxpc3Q9UkRkUXc0dzlXZ1hjUX0=
 
 
-************************************************************************************
+********************************************************************************************

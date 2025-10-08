@@ -1,0 +1,544 @@
+================================================================================
+                    COFFEE SHOP CTF - TRYHACKME WALKTHROUGH
+================================================================================
+
+CHALLENGE OVERVIEW
+==================
+Welcome to the BrewMaster Coffee Shop CTF! This web application is 
+intentionally vulnerable and contains multiple security flaws that you'll 
+need to chain together to capture all the flags.
+
+Difficulty Level: Intermediate
+Estimated Time: 45-60 minutes
+Total Flags: 8
+
+TOOLS REQUIRED
+==============
+- Burp Suite Community Edition
+- Browser Developer Tools (F12)
+- jwt.io (for JWT decoding/encoding)
+- Base64 decoder (online tool or command line)
+- Modern Web Browser (Chrome, Firefox, or Edge)
+
+================================================================================
+                            STEP-BY-STEP WALKTHROUGH
+================================================================================
+
+STEP 1: INITIAL RECONNAISSANCE & LOGIN
+=======================================
+
+Objective: Gain initial access to the application
+
+Actions:
+--------
+1. Navigate to the coffee shop application:
+   https://coffee-apd9gkgqg5h9fqa5.southindia-01.azurewebsites.net
+   (or http://localhost:3000 if running locally)
+
+2. Explore the application:
+   - Browse the coffee menu
+   - Check the register and login pages
+   - Examine the navbar and available features
+
+3. Login with provided credentials:
+   Username: testuser
+   Password: password123
+
+4. Success! You are now authenticated as a regular user
+
+FLAG 1: User authenticated successfully
+
+Learning Points:
+- Application uses JWT tokens for authentication
+- Tokens are stored in both localStorage and cookies
+- Basic user vs admin role distinction exists
+
+================================================================================
+
+STEP 2: XSS DISCOVERY & HINT COLLECTION
+========================================
+
+Objective: Discover XSS vulnerability and uncover hints
+
+Actions:
+--------
+1. Navigate to the coffee menu: /coffee
+
+2. Locate the search box at the top of the menu page
+
+3. Test for XSS by entering this payload:
+   <script>alert('test')</script>
+
+4. Submit the search query
+
+5. Observe the result:
+   - A custom alert appears: "Dio holds all the secrets"
+   - This is a hint pointing to a user named "Dio"
+
+FLAG 2: XSS vulnerability discovered - Dio holds all the secrets
+
+Learning Points:
+- XSS occurs when user input is rendered without sanitization
+- The hint suggests targeting a specific user: "Dio"
+- This will be important for the next exploitation step
+
+================================================================================
+
+STEP 3: NOSQL INJECTION WITH BURP SUITE
+========================================
+
+Objective: Exploit NoSQL injection to extract Dio's credentials and XSS key
+
+Actions:
+--------
+1. Setup Burp Suite:
+   - Open Burp Suite Community Edition
+   - Go to Proxy -> Intercept
+   - Configure browser proxy (127.0.0.1:8080)
+
+2. Navigate to login page and turn on intercept
+
+3. First Attempt - Basic NoSQL Injection:
+   - In browser, attempt to login (any credentials)
+   - Intercept POST request to /auth/login
+   - Modify request body to:
+   
+   {"username": {"$ne": null}, "password": {"$ne": null}}
+   
+   - Forward the request
+   - Response: Hint to target Dio specifically
+
+4. Second Attempt - Targeted NoSQL Injection:
+   - Intercept another login request
+   - Modify request to target Dio:
+   
+   {"username": "Dio", "password": {"$ne": null}}
+   
+   - Forward the request
+
+5. Success! Response contains:
+   - Dio's JWT Token
+   - XSS Key: DioBrandoSecretKey2025
+   - User data including role
+
+FLAG 3: XSS Key acquired: DioBrandoSecretKey2025
+
+Burp Suite Request Example:
+----------------------------
+POST /auth/login HTTP/1.1
+Host: coffee-apd9gkgqg5h9fqa5.southindia-01.azurewebsites.net
+Content-Type: application/json
+Content-Length: 60
+
+{"username":"Dio","password":{"$ne":null}}
+
+Learning Points:
+- NoSQL injection bypasses authentication
+- $ne (not equal) operator returns true for any value
+- Application stores passwords in plain text
+- Special keys can be exposed through API responses
+
+================================================================================
+
+STEP 4: JWT TOKEN ACQUISITION
+==============================
+
+Objective: Obtain a valid JWT token for further exploitation
+
+Actions:
+--------
+Option A - Use Dio's Token:
+- Copy JWT token from Burp Suite response in Step 3
+- Store it for later use
+
+Option B - Login Normally:
+1. Login with testuser credentials in browser
+2. Open Developer Tools (F12)
+3. Navigate to Console tab
+4. Get your JWT token:
+   
+   localStorage.getItem('jwt_token')
+   
+5. Copy the token value
+
+FLAG 4: Valid JWT token obtained
+
+Learning Points:
+- JWT tokens are stored in localStorage and cookies
+- Tokens contain encoded user information
+- Tokens are signed but can be verified with the secret
+
+================================================================================
+
+STEP 5: ADVANCED XSS FOR JWT SECRET EXTRACTION
+===============================================
+
+Objective: Use XSS key to extract the server's JWT secret key
+
+Actions:
+--------
+1. Navigate to any coffee detail page:
+   - Go to /coffee menu
+   - Click on any coffee item to view details
+
+2. Locate XSS vulnerability in comments, reviews, or URL parameters
+
+3. Craft XSS payload using the acquired key:
+   
+   <script>
+   // Using XSS key: DioBrandoSecretKey2025
+   fetch('/api/secret?key=DioBrandoSecretKey2025')
+     .then(r => r.json())
+     .then(data => alert('JWT Secret: ' + data.secret));
+   </script>
+
+4. Alternative approaches:
+   - Look for exposed configuration endpoints
+   - Check developer comments in page source
+   - Try /api/config with the XSS key
+
+5. Expected: JWT Secret will be revealed
+
+FLAG 5: JWT Secret Key extracted
+
+Note: The exact JWT secret depends on .env configuration
+
+Learning Points:
+- XSS can make authenticated requests
+- Secrets should never be exposed client-side
+- Proper secret management is critical
+
+================================================================================
+
+STEP 6: JWT PRIVILEGE ESCALATION
+=================================
+
+Objective: Forge an admin JWT token
+
+Actions:
+--------
+1. Get current JWT token:
+   localStorage.getItem('jwt_token')
+
+2. Copy the token value
+
+3. Navigate to jwt.io
+
+4. Paste JWT in "Encoded" section (left side)
+
+5. Examine decoded payload (middle section):
+   {
+     "userId": "668d4ed24f2c5b864ddaa7729",
+     "username": "testuser",
+     "role": "user",
+     "iat": 1759242102,
+     "exp": 1759245702
+   }
+
+6. Modify role to admin:
+   {
+     "userId": "668d4ed24f2c5b864ddaa7729",
+     "username": "testuser",
+     "role": "admin",
+     "iat": 1759242102,
+     "exp": 1759245702
+   }
+
+7. Enter JWT Secret (from Step 5) in "Verify Signature" section
+
+8. Copy the new forged JWT from "Encoded" section
+
+9. Set the forged token in browser:
+   localStorage.setItem('jwt_token', 'YOUR_FORGED_JWT_HERE');
+   document.cookie = 'token=YOUR_FORGED_JWT_HERE; path=/; SameSite=Lax';
+
+10. Reload the page:
+    location.reload();
+
+11. Success! You now have admin access
+
+FLAG 6: Admin privileges escalated successfully
+
+Learning Points:
+- JWT security depends on the signing secret
+- If secret is known, any token can be forged
+- Role-based access must be validated server-side
+- Never trust client-side tokens without verification
+
+================================================================================
+
+STEP 7: ADMIN DASHBOARD ACCESS
+===============================
+
+Objective: Access admin dashboard and capture admin flag
+
+Actions:
+--------
+1. Navigate to admin dashboard: /admin/dashboard
+   Alternative: Click "Admin Dashboard" in navbar
+
+2. Verify admin access:
+   - See statistics: Total Users, Orders, Products
+   - Admin sidebar with management options
+   - System information panel
+
+3. Locate the flag display section (golden background)
+
+4. Capture the admin flag
+
+FLAG 7: flag{admin_dashboard_accessed}
+
+5. Read File Server section carefully:
+   - Note hint: "Are there more files beyond ID 4?"
+   - This is a clue for the next step
+
+Learning Points:
+- Admin dashboards expose sensitive information
+- Proper authorization checks are essential
+- Information disclosure leads to further exploitation
+
+================================================================================
+
+STEP 8: IDOR & FINAL FLAG
+==========================
+
+Objective: Exploit IDOR to access hidden files and retrieve final flag
+
+Actions:
+--------
+1. From admin dashboard, locate "Admin File Server" section
+
+2. Click "View File 1 (Company Overview)"
+   URL: /admin/files/1
+   Shows company overview document
+
+3. Observe URL pattern: /admin/files/{id}
+
+4. Read hint: "Are there more files beyond ID 4?"
+
+5. Exploit IDOR by incrementing file ID:
+
+   File ID 2 - Sales Report:
+   /admin/files/2
+   
+   File ID 3 - Employee Directory:
+   /admin/files/3
+   
+   File ID 4 - Marketing Plan:
+   /admin/files/4
+   
+   File ID 5 - SECRET ADMIN BACKUP:
+   /admin/files/5
+
+6. Access File ID 5 - you'll see:
+   
+   ******************************************************************
+   
+   CONFIDENTIAL - ADMIN ACCESS ONLY
+   
+   BrewMaster Coffee - Secret Administrative File
+   
+   FLAG: You_Found_The_Secret_File!
+   
+   Get final flag by decoding this:
+   aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1kUXc0dzlXZ1hjUSZsaXN0PVJEZFF3NHc5V2dYY1E=
+   
+   ******************************************************************
+
+7. Decode the Base64 string:
+   
+   Online: https://www.base64decode.org/
+   
+   Command Line (Linux/Mac):
+   echo "aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1kUXc0dzlXZ1hjUSZsaXN0PVJEZFF3NHc5V2dYY1E=" | base64 -d
+   
+   PowerShell (Windows):
+   [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1kUXc0dzlXZ1hjUSZsaXN0PVJEZFF3NHc5V2dYY1E="))
+
+8. Decoded result:
+   https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ
+
+FLAG 8 (FINAL): Never gonna give you up! 🎵
+
+Easter Egg: You've been rickrolled!
+
+Learning Points:
+- IDOR allows unauthorized resource access
+- Sequential IDs are predictable
+- Always implement proper authorization
+- Use UUIDs instead of sequential IDs
+
+================================================================================
+
+SUMMARY OF CAPTURED FLAGS
+==========================
+
+Step 1: User authenticated successfully (Initial Access)
+Step 2: XSS vulnerability discovered - Dio holds all the secrets (XSS)
+Step 3: XSS Key acquired: DioBrandoSecretKey2025 (NoSQL Injection)
+Step 4: Valid JWT token obtained (Token Management)
+Step 5: JWT Secret Key extracted (Information Disclosure)
+Step 6: Admin privileges escalated successfully (JWT Forgery)
+Step 7: flag{admin_dashboard_accessed} (Authorization Bypass)
+Step 8: Never gonna give you up! (IDOR + Base64 Decoding)
+
+================================================================================
+
+VULNERABILITY SUMMARY
+=====================
+
+1. Cross-Site Scripting (XSS)
+   Location: Coffee search (/coffee)
+   Type: Reflected XSS
+   Cause: Unsafe rendering with <%- unsafeSearch %>
+   Impact: Execute arbitrary JavaScript
+
+2. NoSQL Injection
+   Location: Login endpoint (/auth/login)
+   Type: Authentication bypass
+   Cause: Direct user input in MongoDB queries
+   Impact: Complete authentication bypass
+
+3. Plaintext Password Storage
+   Location: Database (User model)
+   Type: Insecure storage
+   Cause: No password hashing
+   Impact: Password exposure if DB compromised
+
+4. Information Disclosure
+   Location: API responses
+   Type: Sensitive data exposure
+   Cause: Exposing secrets in responses
+   Impact: Leakage of cryptographic secrets
+
+5. JWT Secret Exposure
+   Location: Client-side code / API endpoints
+   Type: Cryptographic failure
+   Cause: Hardcoded or exposed JWT secret
+   Impact: Ability to forge any JWT token
+
+6. Insecure JWT Validation
+   Location: Authentication middleware
+   Type: Broken authentication
+   Cause: Trusting client tokens
+   Impact: Privilege escalation
+
+7. Insecure Direct Object Reference (IDOR)
+   Location: File serving (/admin/files/:id)
+   Type: Broken access control
+   Cause: No authorization on file access
+   Impact: Unauthorized file access
+
+8. Missing Authorization Checks
+   Location: Admin endpoints
+   Type: Broken access control
+   Cause: Only checking if admin, not what they access
+   Impact: Privilege escalation
+
+================================================================================
+
+SECURITY RECOMMENDATIONS
+========================
+
+For Developers:
+
+1. Input Validation & Sanitization:
+   - Always sanitize user input before rendering
+   - Use parameterized queries
+   - Implement Content Security Policy (CSP)
+
+2. Password Security:
+   - Use bcrypt, argon2, or scrypt for hashing
+   - Never store passwords in plain text
+   - Implement password strength requirements
+
+3. JWT Best Practices:
+   - Use strong, random secrets (minimum 256 bits)
+   - Store secrets in environment variables
+   - Implement short expiration times
+   - Use refresh token rotation
+
+4. Access Control:
+   - Implement proper authorization for each resource
+   - Use UUIDs instead of sequential IDs
+   - Verify user permissions for every action
+   - Follow principle of least privilege
+
+5. API Security:
+   - Never expose sensitive information
+   - Implement rate limiting
+   - Use HTTPS in production
+   - Validate all input server-side
+
+================================================================================
+
+LEARNING OUTCOMES
+=================
+
+After completing this CTF, you should understand:
+
+- How to identify and exploit XSS vulnerabilities
+- How NoSQL injection differs from SQL injection
+- How JWT tokens work and their security implications
+- How to use Burp Suite for request interception
+- How IDOR vulnerabilities work
+- How to chain vulnerabilities for system compromise
+- Importance of input validation and output encoding
+- Why secrets should never be hardcoded
+
+================================================================================
+
+CONGRATULATIONS!
+================
+
+You've successfully completed the BrewMaster Coffee Shop CTF!
+
+Skills Demonstrated:
+- Web application reconnaissance
+- XSS exploitation
+- NoSQL injection
+- JWT token manipulation
+- IDOR vulnerability exploitation
+- Privilege escalation
+- Base64 encoding/decoding
+
+Total Flags Captured: 8/8
+
+This challenge showcased how multiple vulnerabilities can be chained for
+complete application compromise. Defense in depth is crucial!
+
+================================================================================
+
+ADDITIONAL RESOURCES
+====================
+
+- OWASP Top 10: https://owasp.org/www-project-top-ten/
+- PortSwigger Web Security Academy: https://portswigger.net/web-security
+- OWASP NoSQL Injection: https://owasp.org/www-community/Injection_Flaws
+- JWT.io - JWT Debugger: https://jwt.io
+- OWASP JWT Security Cheat Sheet
+
+================================================================================
+
+CTF CREDITS
+===========
+
+Challenge Name: BrewMaster Coffee Shop CTF
+Category: Web Application Security
+Difficulty: Intermediate
+Platform: TryHackMe
+
+Vulnerabilities Demonstrated:
+- Cross-Site Scripting (XSS)
+- NoSQL Injection
+- JWT Token Forgery
+- Insecure Direct Object Reference (IDOR)
+- Information Disclosure
+- Broken Authentication
+- Broken Access Control
+
+================================================================================
+
+Happy Hacking!
+
+================================================================================

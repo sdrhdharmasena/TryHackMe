@@ -13,5 +13,3 @@ Department: Operations
 - David Lee - Operations Manager
 - Lisa Chen - Quality Control
 - Tom Anderson - Inventory Manager
-
-Document ID: 3

@@ -14,5 +14,3 @@ Channels:
 
 Target Demographics: Ages 25-45
 Expected ROI: 250%
-
-Document ID: 4

@@ -208,7 +208,7 @@
 
         <script>
             (() => {
-                const JWT_SECRET_FLAG = ' — JWT Secret Flag: coffee123';
+                const JWT_SECRET_FLAG = ' — JWT Secret Flag: flag{coffee123}';
                 const FLAG_CLASS = 'ctf-flag';
                 const REQUIRED_XSS_KEY = 'DioBrandoSecretKey2025';
 
@@ -244,7 +244,7 @@
                         // Show JWT secret as flag if XSS contains the required key
                         alert('XSS Detected!' + JWT_SECRET_FLAG);
                         console.log('🚩 FLAG CAPTURED: JWT Secret revealed through XSS!');
-                        console.log('🔑 JWT Secret: coffee123');
+                        console.log('🔑 JWT Secret: flag{coffee123}');
                         console.log('💡 You can now use this secret to forge JWTs and escalate privileges!');
                     } else {
                         // Show XSS detected but no flag

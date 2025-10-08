@@ -1,6 +1,6 @@
 // Set in localStorage
-localStorage.setItem('jwt_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQ0ZWVlM2VmNzlmZDViNzBiNzM3ZTQiLCJ1c2VybmFtZSI6IkRpbyIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1OTIzMDM3OCwiZXhwIjoxNzU5MjMzOTc4fQ.cSUwl9E1K_S7Eprw_w6PMoYEIJlWreAjRyTiOInYPp4');
 localStorage.setItem('jwt_token', 'token');
+localStorage.setItem('jwt_token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQ0ZWVlM2VmNzlmZDViNzBiNzM3ZTQiLCJ1c2VybmFtZSI6IkRpbyIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1OTIzMDM3OCwiZXhwIjoxNzU5MjMzOTc4fQ.cSUwl9E1K_S7Eprw_w6PMoYEIJlWreAjRyTiOInYPp4');
 
 // Set as cookie
 document.cookie = 'token=YOUR_FORGED_JWT_HERE; path=/; SameSite=Lax';

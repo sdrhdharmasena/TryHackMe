@@ -197,8 +197,8 @@ router.get('/files/:id', adminAuth, (req, res) => {
         return res.status(404).json({
             error: 'File not found',
             message: `No file with ID: ${fileId}`,
-            hint: 'Try file IDs 1-5',
-            availableIds: ['1', '2', '3', '4', '5', '6']
+            // hint: 'Try file IDs 1-5',
+            // availableIds: ['1', '2', '3', '4', '5', '6']
         });
     }
     

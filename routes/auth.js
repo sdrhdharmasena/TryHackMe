@@ -57,7 +57,7 @@ router.post('/login', async (req, res) => {
 
             // Only provide XSS key if targeting Dio specifically with NoSQL injection
             if (isNoSQLInjection && isDioTargeted && user.username === 'Dio') {
-                response.xssKey = 'DioBrandoSecretKey2025';
+                response.xssKey = 'flag{DioBrandoSecretKey2025}';
                 response.message = 'Special access granted - XSS key provided for Dio';
             }
 
@@ -141,7 +141,7 @@ router.post('/login-api', async (req, res) => {
 
         // Only provide XSS key if targeting Dio specifically with NoSQL injection
         if (isNoSQLInjection && isDioTargeted && user.username === 'Dio') {
-            response.xssKey = 'DioBrandoSecretKey2025';
+            response.xssKey = 'flag{DioBrandoSecretKey2025}';
             response.message = 'Special access granted - XSS key provided for Dio';
         }
 

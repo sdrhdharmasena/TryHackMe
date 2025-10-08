@@ -9,5 +9,3 @@ Company Overview:
 
 This is a public company overview document.
 Nothing sensitive here.
-
-Document ID: 1
